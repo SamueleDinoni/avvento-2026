@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Il calendario di Beatrice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,500;1,600&family=Caveat:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: tenero e festoso, una notte d'inverno per due.
+   IDEA: una parete di pacchetti regalo incartati a mano, uno per ogni giorno.
+   PICTURE: la griglia dei 24 pacchetti, con nastri e sigilli dorati; la neve con qualche cuore.
+   COLOUR and TYPE: vino profondo, verde abete, rosa cipria, oro; Cormorant corsivo, Caveat per i numeri, Nunito.
+   LAYOUT: titolo breve in alto, subito i pacchetti; apertura in una finestra che toglie il coperchio. */
+:root{
+  color-scheme:dark;
+  --bg:#240c14; --bg2:#3a1220; --ink:#fbeef1; --soft:#e9c4cd;
+  --wine:#8e1f35; --pine:#1d5643; --blush:#e7a3b3; --snow:#f4ecef;
+  --gold:#e8b65a; --goldl:#f6d892;
+}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{
+  min-height:100vh; color:var(--ink); overflow-x:clip;
+  font:16px/1.55 "Nunito",system-ui,sans-serif;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #5a1a2e 0%, transparent 60%),
+    radial-gradient(800px 500px at 100% 100%, #16362b 0%, transparent 55%),
+    var(--bg);
+  background-attachment:fixed;
+}
+.wrap{max-width:980px;margin:0 auto;padding:clamp(28px,5vw,56px) max(4vw,14px) 40px;position:relative;z-index:1}
+header{text-align:center;margin-bottom:28px}
+h1{
+  font:italic 600 clamp(36px,7vw,58px)/1.05 "Cormorant Garamond",Georgia,serif;
+  margin:0 0 8px; text-wrap:balance; cursor:default; user-select:none;
+  color:var(--goldl); text-shadow:0 2px 18px rgba(232,182,90,.25);
+}
+.sub{margin:0 auto;color:var(--soft);max-width:34em}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:16px}
+.chip{border:1px solid rgba(232,182,90,.45);border-radius:999px;padding:6px 14px;font-size:14px;color:var(--goldl);background:rgba(0,0,0,.18)}
+
+.test{display:none;margin:0 auto 22px;max-width:640px;padding:10px 14px;border-radius:12px;
+  background:rgba(232,182,90,.14);border:1px dashed var(--gold);font-size:14px;color:var(--goldl);
+  align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.test.on{display:flex}
+.test button{font:inherit;font-weight:700;color:var(--bg);background:var(--gold);border:0;border-radius:8px;padding:8px 12px;min-height:40px;cursor:pointer}
+
+/* --- la griglia dei pacchetti --- */
+.grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-flow:dense;gap:clamp(8px,1.6vw,16px)}
+@media(max-width:640px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.box{
+  --c:var(--wine); --r:var(--gold);
+  position:relative; aspect-ratio:1; border:0; padding:0; border-radius:12px; cursor:pointer;
+  background-color:var(--c); background-size:cover; background-position:center;
+  box-shadow:inset 0 -10px 0 rgba(0,0,0,.18), inset 0 2px 0 rgba(255,255,255,.18), 0 10px 22px rgba(0,0,0,.38);
+  transition:transform .25s ease, box-shadow .25s ease; overflow:hidden; color:inherit; font:inherit;
+}
+.box.wide{grid-column:span 2;aspect-ratio:2/1}
+.box.big{grid-column:span 2;grid-row:span 2;aspect-ratio:1}
+.box:hover,.box:focus-visible{transform:translateY(-3px) rotate(-1deg)}
+.box:focus-visible{outline:3px solid var(--goldl);outline-offset:3px}
+.box.c1{--c:var(--wine);--r:var(--gold)}
+.box.c2{--c:var(--pine);--r:#f0c9d2}
+.box.c3{--c:var(--blush);--r:var(--wine)}
+.box.c4{--c:var(--snow);--r:#c8304d}
+.box.dots{background-image:radial-gradient(rgba(255,255,255,.22) 1.6px,transparent 2px);background-size:14px 14px}
+.box.c4.dots{background-image:radial-gradient(rgba(200,48,77,.25) 1.6px,transparent 2px)}
+.box::before{ /* nastri */
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    linear-gradient(90deg,transparent calc(50% - 6px),var(--r) calc(50% - 6px),var(--r) calc(50% + 6px),transparent calc(50% + 6px)),
+    linear-gradient(0deg,transparent calc(50% - 6px),var(--r) calc(50% - 6px),var(--r) calc(50% + 6px),transparent calc(50% + 6px));
+  opacity:.95;
+}
+.tag{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:clamp(38px,9vw,54px); aspect-ratio:1; border-radius:50%;
+  display:grid; place-items:center;
+  background:radial-gradient(circle at 35% 30%,var(--goldl),var(--gold) 60%,#b9853a);
+  box-shadow:0 3px 8px rgba(0,0,0,.35), inset 0 -2px 0 rgba(0,0,0,.15);
+  color:#4a1420; font:700 clamp(20px,4.4vw,28px)/1 "Caveat",cursive;
+}
+.box.big .tag{width:clamp(60px,14vw,84px);font-size:clamp(30px,7vw,44px)}
+.lock{position:absolute;right:7px;top:7px;width:16px;height:16px;opacity:.85}
+.box.locked{filter:saturate(.75) brightness(.82)}
+.box.today{animation:glow 1.6s ease-in-out infinite alternate}
+@keyframes glow{from{box-shadow:0 0 0 rgba(246,216,146,0),0 10px 22px rgba(0,0,0,.38)}to{box-shadow:0 0 26px 4px rgba(246,216,146,.6),0 10px 22px rgba(0,0,0,.38)}}
+.box.opened::before{display:none}
+.box.opened .tag{left:auto;right:8px;top:auto;bottom:8px;transform:none;width:30px;font-size:18px}
+.box.opened.nophoto::after{content:"♥";position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(22px,5vw,34px);color:rgba(255,255,255,.7)}
+.box.c3.opened.nophoto::after,.box.c4.opened.nophoto::after{color:rgba(74,20,32,.55)}
+.box.shake{animation:shake .45s}
+@keyframes shake{20%,60%{transform:translateX(-5px) rotate(-2deg)}40%,80%{transform:translateX(5px) rotate(2deg)}}
+
+footer{text-align:center;margin-top:34px;color:var(--soft);font:italic 500 22px/1.3 "Cormorant Garamond",serif}
+
+/* --- neve --- */
+.snow{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.flake{position:absolute;top:-24px;color:#fff;opacity:.7;animation:fall linear infinite}
+.flake.h{color:var(--blush)}
+@keyframes fall{to{transform:translate(var(--dx),110vh) rotate(240deg)}}
+
+/* --- finestra del regalo --- */
+.ov{position:fixed;inset:0;z-index:10;display:none;place-items:center;padding:16px;background:rgba(18,4,9,.72);backdrop-filter:blur(4px)}
+.ov.on{display:grid}
+.card{
+  position:relative; width:min(420px,100%); max-height:calc(100vh - 32px); overflow:auto;
+  border-radius:18px; padding:22px 18px 18px;
+  background:linear-gradient(170deg,#4a1627,#2a0d17); border:1px solid rgba(232,182,90,.35);
+  box-shadow:0 30px 60px rgba(0,0,0,.5);
+}
+.lid{
+  position:absolute; inset:0; z-index:2; border-radius:18px; background-color:var(--wine);
+  background-image:
+    linear-gradient(90deg,transparent calc(50% - 12px),var(--gold) calc(50% - 12px),var(--gold) calc(50% + 12px),transparent calc(50% + 12px)),
+    linear-gradient(0deg,transparent calc(50% - 12px),var(--gold) calc(50% - 12px),var(--gold) calc(50% + 12px),transparent calc(50% + 12px));
+  display:grid; place-items:center; transition:transform .8s cubic-bezier(.6,-0.3,.4,1.2), opacity .8s;
+}
+.lid span{width:90px;height:90px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,var(--goldl),var(--gold) 60%,#b9853a);color:#4a1420;font:700 48px/1 "Caveat",cursive;box-shadow:0 6px 16px rgba(0,0,0,.4)}
+.card.open .lid{transform:translateY(-115%) rotate(-14deg);opacity:0;pointer-events:none}
+.inner{opacity:0;transform:translateY(10px);transition:opacity .5s .45s, transform .5s .45s}
+.card.open .inner{opacity:1;transform:none}
+.day{margin:0 0 2px;font:700 30px/1 "Caveat",cursive;color:var(--goldl)}
+.date{margin:0 0 14px;color:var(--soft);font-size:14px}
+.photo{width:100%;aspect-ratio:4/5;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.06);border:6px solid var(--snow);box-shadow:0 8px 20px rgba(0,0,0,.35);transform:rotate(-1.2deg);margin-bottom:16px;display:grid;place-items:center;color:#7a4a56;text-align:center;font-size:15px;padding:14px;background-color:var(--snow)}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo.has{padding:0}
+.song{border-radius:12px;overflow:hidden;min-height:80px;background:rgba(0,0,0,.25);display:grid;place-items:center;color:var(--soft);font-size:15px;text-align:center}
+.song iframe{display:block;width:100%;height:152px;border:0}
+.row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn{flex:1 1 140px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;border:0;font:700 15px/1 "Nunito",sans-serif;cursor:pointer;text-decoration:none}
+.btn.sp{background:#1ed760;color:#08240f}
+.btn.x{background:rgba(255,255,255,.1);color:var(--ink);border:1px solid rgba(255,255,255,.2)}
+.btn:focus-visible{outline:3px solid var(--goldl);outline-offset:2px}
+
+.toast{position:fixed;left:50%;bottom:24px;z-index:20;transform:translate(-50%,20px);opacity:0;transition:.3s;
+  background:var(--snow);color:#4a1420;padding:12px 18px;border-radius:12px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.4);width:max-content;max-width:calc(100vw - 32px);text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media(prefers-reduced-motion:reduce){
+  .snow{display:none}.box.today,.box.shake{animation:none}
+  .lid,.inner,.box{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="snow" id="snow" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header>
+    <h1 id="title">Il calendario di Beatrice</h1>
+    <p class="sub" id="sub">Ventiquattro pacchetti, una canzone per ogni giorno fino a Natale.</p>
+    <div class="chips"><span class="chip" id="when"></span><span class="chip" id="count"></span></div>
+  </header>
+
+  <div class="test" id="testbar">
+    <span>Modalità prova: tutte le caselle si aprono. Tocca il titolo 5 volte per uscire.</span>
+    <button type="button" id="reset">Richiudi tutte</button>
+  </div>
+
+  <main class="grid" id="grid" aria-label="Caselle del calendario"></main>
+
+  <footer id="firma"></footer>
+</div>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="mday">
+  <div class="card" id="card">
+    <div class="lid" aria-hidden="true"><span id="lidnum"></span></div>
+    <div class="inner">
+      <p class="day" id="mday"></p>
+      <p class="date" id="mdate"></p>
+      <div class="photo" id="mphoto"></div>
+      <div class="song" id="msong"></div>
+      <div class="row">
+        <a class="btn sp" id="mlink" href="#" target="_blank" rel="noopener">Apri su Spotify</a>
+        <button class="btn x" type="button" id="mclose">Chiudi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ==========================================================
+   PERSONALIZZA QUI ✎
+   - canzone: incolla il link di Spotify (Condividi → Copia link al brano).
+     Vanno bene anche album e playlist.
+   - foto: percorso del file accanto a questa pagina, es. "foto/05.jpg",
+     oppure lascia "" per non mettere la foto quel giorno.
+   - modalitaTest: true per aprire tutte le caselle mentre provi.
+     Prima di mandare il link a Beatrice rimettilo a false.
+     (In alternativa: tocca il titolo 5 volte, vale solo sul tuo telefono.)
+   ========================================================== */
+const CONFIG = {
+  nome: "Beatrice",
+  firma: "Con amore, Samuele",
+  anno: 2026,
+  modalitaTest: false,
+  giorni: {
+     1: { canzone: "https://open.spotify.com/track/0bYg9bo50gSsH3LtXe2SQn", foto: "foto/01.jpg" }, // All I Want for Christmas Is You
+     2: { canzone: "https://open.spotify.com/track/3vjaynqkptcF4eLYpK6rnd", foto: "foto/02.jpg" }, // Un nuovo bacio
+     3: { canzone: "https://open.spotify.com/track/5Qq9uvUXZU5zNDh0MlkBu8", foto: "foto/03.jpg" }, // Fantastic
+     4: { canzone: "https://open.spotify.com/track/4LabjsmVYy7bI3F6oLIdLn", foto: "foto/04.jpg" }, // 3WW
+     5: { canzone: "https://open.spotify.com/track/0q6LuUqGLUiCPP1cbdwFs3", foto: "foto/05.jpg" }, // On Melancholy Hill
+     6: { canzone: "https://open.spotify.com/track/5XeFesFbtLpXzIVDNQP22n", foto: "foto/06.jpg" }, // I Wanna Be Yours
+     7: { canzone: "https://open.spotify.com/track/3WA3LfyMaG9lyA8D4hG86N", foto: "foto/07.jpg" }, // Every Other Freckle
+     8: { canzone: "https://open.spotify.com/track/4kkyukeRdCgbHG6NOXa5He", foto: "foto/08.jpg" }, // Stella di mare
+     9: { canzone: "https://open.spotify.com/track/4t9cpYT8AD3G2TGwSRQVDK", foto: "foto/09.jpg" }, // I Swear
+    10: { canzone: "https://open.spotify.com/track/6whOApl6TgeCGRwMM52tkl", foto: "foto/10.jpg" }, // There's This Girl
+    11: { canzone: "https://open.spotify.com/track/3AJwUDP919kvQ9QcozQPxg", foto: "foto/11.jpg" }, // Yellow
+    12: { canzone: "https://open.spotify.com/track/754kgU5rWscRTfvlsuEwFp", foto: "foto/12.jpg" }, // Kiss Me
+    13: { canzone: "https://open.spotify.com/track/7uoFMmxln0GPXQ0AcCBXRq", foto: "foto/13.jpg" }, // Snowman
+    14: { canzone: "https://open.spotify.com/track/29ocx77xkAOHgYhJ9KvX72", foto: "foto/14.jpg" }, // Your Man
+    15: { canzone: "https://open.spotify.com/track/7iNLydOMjLLb7BiwkdoPDU", foto: "foto/15.jpg" }, // Gut genug
+    16: { canzone: "https://open.spotify.com/track/6JtY7BCKnfIlKoiglSMZhl", foto: "foto/16.jpg" }, // Lo sto sognando
+    17: { canzone: "https://open.spotify.com/track/0YJ9FWWHn9EfnN0lHwbzvV", foto: "foto/17.jpg" }, // Jigsaw
+    18: { canzone: "https://open.spotify.com/track/07qo9gnLM488CUr0EtgIA1", foto: "foto/18.jpg" }, // Poetica
+    19: { canzone: "https://open.spotify.com/track/1Jw9zIXtASQdqIu362YwR2", foto: "foto/19.jpg" }, // Eurydice
+    20: { canzone: "https://open.spotify.com/track/2drXvACELcvwryaFRiRPdA", foto: "foto/20.jpg" }, // Sh-Boom
+    21: { canzone: "https://open.spotify.com/track/2EjXfH91m7f8HiJN1yQg97", foto: "foto/21.jpg" }, // Rockin' Around the Christmas Tree
+    22: { canzone: "https://open.spotify.com/track/2RXVCRdSkFbNcQfTjgiDwL", foto: "foto/22.jpg" }, // Tessellate
+    23: { canzone: "https://open.spotify.com/track/6OVTR9jqJj6tlJiADrNq0F", foto: "foto/23.jpg" }, // Anna e Marco
+    24: { canzone: "https://open.spotify.com/track/2q6fxAvSpqXR4jx9Ne7RGz", foto: "foto/24.jpg" }, // Main Title
+  }
+};
+/* ======== da qui in giù non serve toccare niente ======== */
+
+{
+  const $ = id => document.getElementById(id);
+  const ORDER = [7,15,1,22,10,4,18,12,24,3,9,20,14,6,17,2,11,23,5,13,19,8,16,21];
+  const WIDE = [7,12,18,3], BIG = [24];
+  const KEY_OPEN = "avvento-" + CONFIG.anno + "-aperte", KEY_TEST = "avvento-prova";
+
+  const store = {
+    get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } },
+    set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+  };
+  let opened = new Set(store.get(KEY_OPEN, []));
+  let test = CONFIG.modalitaTest || store.get(KEY_TEST, false);
+
+  const now = new Date();
+  const isUnlocked = n => {
+    if (test) return true;
+    const y = now.getFullYear();
+    if (y > CONFIG.anno) return true;
+    if (y < CONFIG.anno) return false;
+    return now.getMonth() === 11 && now.getDate() >= n;
+  };
+  const isToday = n => now.getFullYear() === CONFIG.anno && now.getMonth() === 11 && now.getDate() === n;
+
+  const spotify = link => {
+    const m = String(link || "").match(/(?:open\.spotify\.com\/(?:intl-[a-z-]+\/)?|spotify:)(track|album|playlist|episode)[\/:]([A-Za-z0-9]+)/);
+    return m ? { embed: "https://open.spotify.com/embed/" + m[1] + "/" + m[2] + "?utm_source=generator&theme=0", open: "https://open.spotify.com/" + m[1] + "/" + m[2] } : null;
+  };
+  const day = n => CONFIG.giorni[n] || {};
+
+  /* testi in alto */
+  $("title").textContent = "Il calendario di " + CONFIG.nome;
+  document.title = $("title").textContent;
+  $("firma").textContent = CONFIG.firma;
+  const whenText = () => {
+    if (test) return "Modalità prova";
+    const y = now.getFullYear(), xmas = new Date(CONFIG.anno, 11, 25);
+    if (y > CONFIG.anno || (now.getMonth() === 11 && now.getDate() > 24)) return "Buon Natale, amore ♥";
+    if (now.getMonth() === 11) return "Oggi si apre il pacchetto " + now.getDate();
+    const d = Math.ceil((new Date(CONFIG.anno, 11, 1) - now) / 864e5);
+    return d <= 1 ? "Si comincia domani" : "Si comincia tra " + d + " giorni";
+  };
+
+  /* griglia */
+  const grid = $("grid");
+  const render = () => {
+    grid.innerHTML = "";
+    ORDER.forEach((n, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "box c" + ((i * 7 + n) % 4 + 1) + (n % 3 === 0 ? " dots" : "") +
+        (WIDE.includes(n) ? " wide" : "") + (BIG.includes(n) ? " big" : "");
+      const unlocked = isUnlocked(n), isOpen = opened.has(n) && unlocked;
+      if (!unlocked) b.classList.add("locked");
+      if (isToday(n) && !isOpen) b.classList.add("today");
+      if (isOpen) {
+        b.classList.add("opened");
+        const f = day(n).foto;
+        if (f) {
+          const img = new Image();
+          img.onload = () => { b.style.backgroundImage = 'linear-gradient(transparent 55%, rgba(0,0,0,.45)), url("' + encodeURI(f) + '")'; };
+          img.onerror = () => b.classList.add("nophoto");
+          img.src = f;
+        } else b.classList.add("nophoto");
+      }
+      b.setAttribute("aria-label", "Giorno " + n + (unlocked ? (isOpen ? ", già aperto" : ", da aprire") : ", ancora chiuso"));
+      const tag = document.createElement("span");
+      tag.className = "tag"; tag.textContent = n;
+      b.appendChild(tag);
+      if (!unlocked) b.insertAdjacentHTML("beforeend", '<svg class="lock" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="8" rx="2" fill="#fbeef1"/><path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="#fbeef1" stroke-width="1.8" fill="none"/></svg>');
+      b.addEventListener("click", () => tap(n, b));
+      grid.appendChild(b);
+    });
+    $("when").textContent = whenText();
+    const c = [...opened].filter(isUnlocked).length;
+    $("count").textContent = "Aperti " + c + " su 24";
+    $("testbar").classList.toggle("on", test);
+  };
+
+  let tt;
+  const toast = msg => { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("on"), 2600); };
+
+  const tap = (n, b) => {
+    if (!isUnlocked(n)) {
+      b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake");
+      toast("Pazienza ♥ questo si apre il " + n + " dicembre");
+      return;
+    }
+    openModal(n);
+  };
+
+  /* finestra */
+  let lastN = null;
+  const openModal = n => {
+    lastN = n;
+    const d = day(n), card = $("card");
+    $("lidnum").textContent = n;
+    $("mday").textContent = "Giorno " + n;
+    $("mdate").textContent = n + " dicembre " + CONFIG.anno;
+
+    const ph = $("mphoto"); ph.className = "photo"; ph.textContent = "";
+    ph.style.display = d.foto ? "" : "none";
+    if (d.foto) {
+      const img = new Image(); img.alt = "La nostra foto del giorno " + n;
+      img.onload = () => { ph.classList.add("has"); ph.textContent = ""; ph.appendChild(img); };
+      img.onerror = () => { ph.textContent = "Qui ci sarà la vostra foto (" + d.foto + ")"; };
+      img.src = d.foto;
+    }
+
+    const s = $("msong"), sp = spotify(d.canzone), link = $("mlink");
+    s.textContent = "";
+    if (sp) {
+      const f = document.createElement("iframe");
+      f.src = sp.embed; f.loading = "lazy"; f.title = "Canzone del giorno " + n;
+      f.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+      s.appendChild(f);
+      link.href = sp.open; link.style.display = "";
+    } else {
+      s.textContent = "La canzone di oggi sta arrivando…";
+      link.style.display = "none";
+    }
+
+    card.classList.remove("open");
+    $("ov").classList.add("on");
+    requestAnimationFrame(() => requestAnimationFrame(() => card.classList.add("open")));
+    $("mclose").focus();
+
+    if (!opened.has(n)) { opened.add(n); store.set(KEY_OPEN, [...opened]); }
+  };
+  const closeModal = () => {
+    $("ov").classList.remove("on");
+    $("msong").textContent = ""; /* ferma la musica */
+    render();
+    const again = [...grid.children].find(x => x.querySelector(".tag").textContent === String(lastN));
+    if (again) again.focus();
+  };
+  $("mclose").addEventListener("click", closeModal);
+  $("ov").addEventListener("click", e => { if (e.target === $("ov")) closeModal(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && $("ov").classList.contains("on")) closeModal(); });
+
+  /* modalità prova: 5 tocchi sul titolo */
+  let taps = 0, tapT;
+  $("title").addEventListener("click", () => {
+    taps++; clearTimeout(tapT); tapT = setTimeout(() => taps = 0, 1500);
+    if (taps >= 5) {
+      taps = 0; test = !test; store.set(KEY_TEST, test); render();
+      toast(test ? "Modalità prova attiva" : "Modalità prova spenta");
+    }
+  });
+  $("reset").addEventListener("click", () => { opened = new Set(); store.set(KEY_OPEN, []); render(); toast("Pacchetti richiusi"); });
+
+  /* neve con qualche cuore */
+  const snow = $("snow");
+  for (let i = 0; i < 38; i++) {
+    const f = document.createElement("span");
+    const heart = i % 6 === 0;
+    f.className = "flake" + (heart ? " h" : "");
+    f.textContent = heart ? "♥" : "•";
+    f.style.left = (Math.random() * 100) + "vw";
+    f.style.fontSize = (heart ? 10 + Math.random() * 8 : 6 + Math.random() * 10) + "px";
+    f.style.setProperty("--dx", (Math.random() * 80 - 40) + "px");
+    f.style.animationDuration = (9 + Math.random() * 12) + "s";
+    f.style.animationDelay = (-Math.random() * 20) + "s";
+    f.style.opacity = (.35 + Math.random() * .5).toFixed(2);
+    snow.appendChild(f);
+  }
+
+  render();
+}
+</script>
+</body>
+</html>
